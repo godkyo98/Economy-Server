@@ -8,8 +8,8 @@
 		"Kyo"
 	],
 	"contact": {
-		"homepage": "https://fabricmc.net/",
-		"sources": "https://github.com/FabricMC/fabric-example-mod"
+		"homepage": "https://kyo-series-and-game.web.app/",
+		"sources": "https://github.com/godkyo98/Economy-Server"
 	},
 	"license": "CC0-1.0",
 	"icon": "assets/kyoeconomy/icon.png",

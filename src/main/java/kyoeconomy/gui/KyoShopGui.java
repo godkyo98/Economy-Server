@@ -27,9 +27,7 @@ public class KyoShopGui extends SimpleGui {
 
     private int currentPage = 0;
     private static final int ITEMS_PER_PAGE = 45;
-
-    // Khôi phục tỉ lệ 5% (0.05) chuẩn chỉ của Kyo
-    private static final double SELL_RATIO = 0.05;
+    private static final double SELL_RATIO = 0.10; // Tỉ lệ thu mua 10% từ giá cơ bản gốc
 
     public KyoShopGui(ServerPlayer player) {
         super(MenuType.GENERIC_9x6, player, false);
@@ -43,20 +41,24 @@ public class KyoShopGui extends SimpleGui {
             return super.onAnyClick(index, type, action);
         }
 
+        // Tương tác trực tiếp trên các ô túi đồ của người chơi (Khung dưới)
         if (index >= this.getSize()) {
             if (type.isRight) {
                 try {
                     ItemStack itemInInventory = this.player.containerMenu.getSlot(index).getItem();
                     if (!itemInInventory.isEmpty()) {
 
+                        // Chỉ áp dụng cho đồ không chồng được (Công cụ, vũ khí, giáp...)
                         if (itemInInventory.getMaxStackSize() > 1) {
                             return super.onAnyClick(index, type, action);
                         }
 
                         if (type.shift) {
-                            handleSellAllFromInventory(itemInInventory);
-                        } else {
+                            // SHIFT + PHẢI: Tiến hành bán đứt vật phẩm
                             handleInventoryRightClickSell(itemInInventory);
+                        } else {
+                            // CHUỘT PHẢI ĐƠN THUẦN: Chỉ kiểm tra và thẩm định giá, KHÔNG bán đồ
+                            handleInventoryPriceCheck(itemInInventory);
                         }
                         return true;
                     }
@@ -94,28 +96,29 @@ public class KyoShopGui extends SimpleGui {
             int level = entry.getIntValue();
             String enchantDescription = enchantHolder.toString().toLowerCase();
 
+            // 📈 ĐÃ NÂNG TOÀN BỘ GIÁ TRỊ PHÙ PHÉP LÊN 1 BẬC LỚN ĐỂ TĂNG GIÁ TRỊ CÀY CUỐC
             if (enchantDescription.contains("curse_of_binding") || enchantDescription.contains("curse_of_vanishing")) {
-                bonus += 100L;
+                bonus += 1000L; // Lời nguyền: 1 Xu
             } else if (enchantDescription.contains("mending")) {
-                bonus += 100000L;
+                bonus += 200000L; // Sửa chữa (Thần cấp): 200 Xu
             } else if (enchantDescription.contains("fortune") || enchantDescription.contains("looting") || enchantDescription.contains("silk_touch") ||
                 enchantDescription.contains("infinity") || enchantDescription.contains("wind_burst") || enchantDescription.contains("swift_sneak")) {
-                bonus += (level * 25000L);
+                bonus += (level * 50000L); // Bậc Tối Thượng: 50 Xu / Cấp độ
             } else if (enchantDescription.contains("sharpness") || enchantDescription.contains("efficiency") || enchantDescription.contains("protection") ||
                 enchantDescription.contains("unbreaking") || enchantDescription.contains("power") || enchantDescription.contains("breach") ||
                 enchantDescription.contains("density") || enchantDescription.contains("sweeping_edge") || enchantDescription.contains("lunge") ||
                 enchantDescription.contains("channeling") || enchantDescription.contains("multishot") || enchantDescription.contains("piercing") ||
                 enchantDescription.contains("quick_charge") || enchantDescription.contains("riptide") || enchantDescription.contains("loyalty")) {
-                bonus += (level * 10000L);
+                bonus += (level * 25000L); // Bậc Cao Cấp: 25 Xu / Cấp độ
             } else if (enchantDescription.contains("smite") || enchantDescription.contains("bane_of_arthropods") || enchantDescription.contains("knockback") ||
                 enchantDescription.contains("punch") || enchantDescription.contains("fire_aspect") || enchantDescription.contains("flame") ||
                 enchantDescription.contains("thorns") || enchantDescription.contains("feather_falling") || enchantDescription.contains("depth_strider") ||
                 enchantDescription.contains("frost_walker") || enchantDescription.contains("soul_speed") || enchantDescription.contains("respiration") ||
                 enchantDescription.contains("aqua_affinity") || enchantDescription.contains("luck_of_the_sea") || enchantDescription.contains("lure") ||
                 enchantDescription.contains("impaling")) {
-                bonus += (level * 5000L);
+                bonus += (level * 10000L); // Bậc Trung Cấp: 10 Xu / Cấp độ
             } else {
-                bonus += (level * 500L);
+                bonus += (level * 5000L); // Bậc Thấp Nhất (Bậc kém nhất): Tăng lên chuẩn 5 Xu (5,000 Hào) theo yêu cầu!
             }
         }
         return bonus;
@@ -130,10 +133,34 @@ public class KyoShopGui extends SimpleGui {
         return null;
     }
 
-    // Hàm phụ trợ tính giá trị thu mua chốt cứng từ giá gốc
     private long getFixedSellPrice(ShopItem item) {
         long referencePrice = item.minPrice > 0 ? item.minPrice : item.price;
         return (long) Math.max(1, referencePrice * SELL_RATIO);
+    }
+
+    // 🔍 MÁY THẨM ĐỊNH GIÁ TRỊ VẬT PHẨM (KHÔNG THU HỒI ĐỒ)
+    private void handleInventoryPriceCheck(ItemStack stack) {
+        ShopItem targetShopItem = getShopItem(stack.getItem());
+
+        if (targetShopItem == null) {
+            this.player.sendSystemMessage(Component.literal("Vật phẩm này không có trên sàn giao dịch máy chủ!").withStyle(ChatFormatting.RED));
+            this.player.level().playSound(null, this.player.blockPosition(), SoundEvents.VILLAGER_NO, SoundSource.PLAYERS, 1.0f, 1.0f);
+            return;
+        }
+
+        long fixedBaseSellPrice = getFixedSellPrice(targetShopItem);
+        long enchantBonus = calculateEnchantmentBonus(stack);
+        long finalPriceInHao = fixedBaseSellPrice + enchantBonus;
+
+        // In ra hóa đơn thẩm định chuyên nghiệp vào khung chat cá nhân
+        this.player.sendSystemMessage(Component.literal("------- 🔍 KẾT QUẢ THẨM ĐỊNH GIÁ CƠ BẢN -------").withStyle(ChatFormatting.LIGHT_PURPLE));
+        this.player.sendSystemMessage(Component.literal("Vật phẩm: ").withStyle(ChatFormatting.GRAY).append(stack.getHoverName()));
+        this.player.sendSystemMessage(Component.literal("• Giá trị phế liệu gốc: ").withStyle(ChatFormatting.GRAY).append(formatMoney(fixedBaseSellPrice)));
+        this.player.sendSystemMessage(Component.literal("• Giá trị phù phép tích hợp: ").withStyle(ChatFormatting.GRAY).append(formatMoney(enchantBonus)));
+        this.player.sendSystemMessage(Component.literal("➡ Tổng giá trị thu mua dự kiến: ").withStyle(ChatFormatting.GREEN, ChatFormatting.BOLD).append(formatMoney(finalPriceInHao)));
+        this.player.sendSystemMessage(Component.literal("--------------------------------------------").withStyle(ChatFormatting.LIGHT_PURPLE));
+
+        this.player.level().playSound(null, this.player.blockPosition(), SoundEvents.EXPERIENCE_ORB_PICKUP, SoundSource.PLAYERS, 1.0f, 1.2f);
     }
 
     private void handleInventoryRightClickSell(ItemStack stack) {
@@ -145,7 +172,6 @@ public class KyoShopGui extends SimpleGui {
             return;
         }
 
-        // Ép cứng giá bán là 5% của Giá Min (hoặc Giá cố định nếu không random)
         long fixedBaseSellPrice = getFixedSellPrice(targetShopItem);
         long enchantBonus = calculateEnchantmentBonus(stack);
         long finalPriceInHao = fixedBaseSellPrice + enchantBonus;
@@ -156,7 +182,7 @@ public class KyoShopGui extends SimpleGui {
         KyoEconomyState state = KyoEconomyState.getServerState(this.player.level().getServer());
         state.addBalance(this.player.getUUID(), finalPriceInHao);
 
-        this.player.sendSystemMessage(Component.literal("Đã bán nhanh 1x " + targetShopItem.name + ", thu về ").withStyle(ChatFormatting.GREEN)
+        this.player.sendSystemMessage(Component.literal("Đã bán nhanh " + targetShopItem.name + ", thu về ").withStyle(ChatFormatting.GREEN)
             .append(formatMoney(finalPriceInHao)).append(Component.literal("!").withStyle(ChatFormatting.GREEN)));
         this.player.level().playSound(null, this.player.blockPosition(), SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.PLAYERS, 1.0f, 1.0f);
     }
@@ -271,10 +297,7 @@ public class KyoShopGui extends SimpleGui {
         for (int i = startIndex; i < endIndex; i++) {
             ShopItem shopItem = allItems.get(i);
 
-            // Mua: Bị chi phối bởi Thị trường (Biến động theo giờ)
             long baseBuyPriceInHao = shopItem.getCurrentPrice();
-
-            // Bán: Chốt cứng ngắc 5% giá Sàn (minPrice) để ngăn chặn lỗ hổng kinh tế
             long fixedSellPriceInHao = getFixedSellPrice(shopItem);
 
             GuiElementBuilder elementBuilder = GuiElementBuilder.from(new ItemStack(shopItem.item))
@@ -285,8 +308,8 @@ public class KyoShopGui extends SimpleGui {
                 .addLoreLine(Component.literal(""))
                 .addLoreLine(Component.literal("🛒 Tương tác trên Shop (Khung trên):").withStyle(ChatFormatting.GRAY))
                 .addLoreLine(Component.literal("   Chuột Trái: Mua 1 | Chuột Phải: Bán 1 | Shift+Phải: Bán hết").withStyle(ChatFormatting.DARK_GRAY))
-                .addLoreLine(Component.literal("⚡ Mẹo bán nhanh đồ Không Xếp Chồng (Cung, Cần câu...):").withStyle(ChatFormatting.LIGHT_PURPLE, ChatFormatting.ITALIC))
-                .addLoreLine(Component.literal("   Ấn Chuột Phải trực tiếp vào đồ trong Túi của bạn!").withStyle(ChatFormatting.LIGHT_PURPLE, ChatFormatting.ITALIC))
+                .addLoreLine(Component.literal("⚡ Mẹo tương tác đồ trong Túi của bạn (Khung dưới):").withStyle(ChatFormatting.LIGHT_PURPLE))
+                .addLoreLine(Component.literal("   Chuột Phải: Thẩm định giá phù phép | Shift+Phải: Bán nhanh đồ").withStyle(ChatFormatting.YELLOW))
                 .addLoreLine(Component.literal(""))
                 .setCallback((indexSlot, type, actionSlot, gui) -> {
                     if (type.isLeft) {
@@ -328,7 +351,7 @@ public class KyoShopGui extends SimpleGui {
 
         GuiElementBuilder infoButton = GuiElementBuilder.from(new ItemStack(Items.PAPER))
             .setName(Component.literal("Trang " + (currentPage + 1) + " / " + Math.max(1, maxPages)).withStyle(ChatFormatting.WHITE));
-        this.setSlot(53, infoButton);
+        this.setSlot(49, infoButton);
     }
 
     private void handleBuy(ServerPlayer buyer, Item itemType, long priceInHao, int amount) {

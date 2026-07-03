@@ -11,7 +11,7 @@ import java.util.*;
 
 public class KyoLeaderboardManager {
   private static long lastUpdateTime = 0;
-  private static final long COOLDOWN_MS = 5 * 60 * 1000; // Bộ đếm: 5 phút cập nhật 1 lần
+  private static final long COOLDOWN_MS = 5 * 60 * 1000; // Bộ đếm: 5 phút quét xếp hạng lại 1 lần
 
   public static void tick(MinecraftServer server) {
     long now = System.currentTimeMillis();
@@ -28,33 +28,36 @@ public class KyoLeaderboardManager {
     // Nếu server chưa có ai có tiền thì bỏ qua
     if (balances.isEmpty()) return;
 
-    // 1. Sắp xếp danh sách tài khoản theo thứ tự giảm dần và lấy Top 3
+    // 1. Sắp xếp danh sách tài khoản theo thứ tự giảm dần và lấy hẳn TOP 5
     List<Map.Entry<UUID, Long>> topPlayers = balances.entrySet().stream()
         .sorted(Map.Entry.<UUID, Long>comparingByValue().reversed())
-        .limit(3)
+        .limit(5)
         .toList();
 
     Scoreboard scoreboard = server.getScoreboard();
 
-    // 2. Cấu hình 3 Đội (Team) với Tiền tố tương ứng
-    setupTeam(scoreboard, "kyo_rank_1", "[Phú Hộ] ", ChatFormatting.GOLD);
-    setupTeam(scoreboard, "kyo_rank_2", "[Cự Phú] ", ChatFormatting.GRAY); // Bạc
-    setupTeam(scoreboard, "kyo_rank_3", "[Thương Gia] ", ChatFormatting.RED); // Đồng
+    // 2. Thiết kế lại Tiền tố danh hiệu với Ký tự đặc biệt siêu nổi bật cho 5 bậc Giai Cấp
+    setupTeam(scoreboard, "kyo_rank_1", "✦ 👑 [ĐẠI PHÚ HỘ] ✦ ", ChatFormatting.GOLD);
+    setupTeam(scoreboard, "kyo_rank_2", "✧ 🌟 [CỰ PHÚ] ✧ ", ChatFormatting.AQUA);
+    setupTeam(scoreboard, "kyo_rank_3", "🔸 💎 [ĐẠI THƯƠNG] 🔸 ", ChatFormatting.LIGHT_PURPLE);
+    setupTeam(scoreboard, "kyo_rank_4", "🔹 ⚜ [TÀI PHIỆT] 🔹 ", ChatFormatting.GREEN);
+    setupTeam(scoreboard, "kyo_rank_5", "▪ 🪙 [PHÚ HÀO] ▪ ", ChatFormatting.GRAY);
 
-    // 3. Phân bổ người chơi vào Đội
-    for (int i = 0; i < 3; i++) {
+    // 3. Quét dọn dẹp và phân bổ người chơi lọt Top vào Đội tương ứng
+    for (int i = 0; i < 5; i++) {
       PlayerTeam team = scoreboard.getPlayerTeam("kyo_rank_" + (i + 1));
       if (team != null) {
-        // Đá tất cả thành viên cũ ra khỏi Đội này để nhường chỗ cho Top mới
+        // Đá tất cả thành viên cũ ra khỏi danh hiệu này để nhường chỗ cho thế hệ đại gia mới
         Collection<String> oldMembers = new ArrayList<>(team.getPlayers());
         for (String member : oldMembers) {
           scoreboard.removePlayerFromTeam(member, team);
         }
 
+        // Nếu vị trí Top này có người nắm giữ
         if (i < topPlayers.size()) {
           UUID topUuid = topPlayers.get(i).getKey();
 
-          // FIX: Lấy tên người chơi thông qua danh sách Online thay vì Profile Cache cũ
+          // Chỉ những đại gia đang Online mới được khoác áo vinh quang (Tiết kiệm CPU/RAM)
           ServerPlayer p = server.getPlayerList().getPlayer(topUuid);
           if (p != null) {
             scoreboard.addPlayerToTeam(p.getScoreboardName(), team);
@@ -69,9 +72,7 @@ public class KyoLeaderboardManager {
     if (team == null) {
       team = scoreboard.addPlayerTeam(teamName);
     }
-
-    // Chỉ dùng setPlayerPrefix để gán tag màu (VD: [Phú Hộ] lấp lánh Vàng)
-    // Bỏ qua hàm team.setColor() để tránh lỗi Optional<TeamColor> gắt gao của bản 26.2
+    // Ép chữ đậm (BOLD) và phủ màu rực rỡ lên toàn bộ tag ký tự đặc biệt
     team.setPlayerPrefix(Component.literal(prefix).withStyle(color, ChatFormatting.BOLD));
   }
 }

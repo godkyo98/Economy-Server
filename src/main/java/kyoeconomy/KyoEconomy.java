@@ -9,13 +9,13 @@ import kyoeconomy.data.KyoEconomyState;
 import kyoeconomy.data.KyoLeaderboardManager;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,27 +33,14 @@ public class KyoEconomy implements ModInitializer {
 		// Đăng ký hệ thống lệnh
 		KyoEconomyCommands.register();
 
-		// Đăng ký Event chạy ngầm mỗi khi Server hoàn thành 1 Tick
-		ServerTickEvents.END_SERVER_TICK.register(KyoLeaderboardManager::tick);
-
-		// Bên trong hàm onInitialize():
-		ServerTickEvents.END_SERVER_TICK.register(ShopConfigManager::tick);
-
-		// 2. Đăng ký biến Placeholder API chuẩn v3 (TRẢ VỀ COMPONENT ĐA MÀU SẮC)
+		// 2. Đăng ký Placeholder "balance" rút gọn thông minh cho Scoreboard / Tab List
 		Placeholders.registerServer(Identifier.fromNamespaceAndPath(MOD_ID, "balance"), (context, argument) -> {
-			if (!context.hasPlayer()) {
-				return PlaceholderResult.invalid("No player found");
-			}
-
-			ServerPlayer player = (ServerPlayer) context.player();
-			if (player == null) {
+			if (context.player() == null) {
 				return PlaceholderResult.invalid("Player object is null");
 			}
 
-			MinecraftServer server = context.server();
-			if (server == null) {
-				server = player.level().getServer();
-			}
+			ServerPlayer player = context.serverPlayer();
+			MinecraftServer server = context.server() != null ? context.server() : player.level().getServer();
 
 			if (server == null) {
 				return PlaceholderResult.invalid("Minecraft server is null");
@@ -62,31 +49,55 @@ public class KyoEconomy implements ModInitializer {
 			KyoEconomyState state = KyoEconomyState.getServerState(server);
 			long totalHao = state.getBalance(player.getUUID());
 
-			// TÍNH TOÁN QUY ĐỔI XU VÀ HÀO
-			long xu = totalHao / 1000;
-			long hao = totalHao % 1000;
-
-			// XUẤT RA COMPONENT ĐA MÀU SẮC
-			MutableComponent moneyComponent;
-
-			if (xu > 0 && hao > 0) {
-				moneyComponent = Component.literal(String.format("%,d Xu ", xu)).withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD)
-						.append(Component.literal(String.format("%,d Hào", hao)).withStyle(ChatFormatting.YELLOW));
-			} else if (xu > 0) {
-				moneyComponent = Component.literal(String.format("%,d Xu", xu)).withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD);
-			} else {
-				moneyComponent = Component.literal(String.format("%,d Hào", hao)).withStyle(ChatFormatting.YELLOW);
-			}
-
-			// Trả về thẳng Component (Hệ thống PB4 sẽ lo liệu phần màu sắc)
-			return PlaceholderResult.value(moneyComponent);
+			// 🎯 GỌI HÀM RÚT GỌN KHI ĐẨY RA SCOREBOARD / TAB LIST
+			return PlaceholderResult.value(formatCompactMoney(totalHao));
 		});
 
-		// 3. Đợi Server chạy xong mới nạp Admin Shop để tránh lỗi Registry
+		// 3. Đợi Server khởi động xong để nạp dữ liệu Admin Shop cố định mốc giá ban đầu
 		ServerLifecycleEvents.SERVER_STARTED.register(server -> {
-			LOGGER.info("[KyoEconomy] Máy chủ đã sẵn sàng. Tiến hành nạp dữ liệu Admin Shop...");
 			ShopConfigManager.loadShop();
-			LOGGER.info("[KyoEconomy] Nạp dữ liệu Admin Shop hoàn tất!");
+			LOGGER.info("[KyoEconomy] Cửa hàng máy chủ đã được đồng bộ dữ liệu thành công!");
 		});
+
+		// 4. Đăng ký bộ đếm ngầm: Cắm điện cho đồng hồ Sàn Chứng Khoán và Leaderboard Phú Hộ chạy mỗi tick
+		ServerTickEvents.END_SERVER_TICK.register(server -> {
+			ShopConfigManager.tick(server);
+			KyoLeaderboardManager.tick(server);
+		});
+	}
+
+	// 🪙 HÀM RÚT GỌN TIỀN TỆ ĐỂ HIỂN THỊ TRÊN SCOREBOARD / TAB LIST (TỐI ƯU GIAO DIỆN CHỐNG VỠ KHUNG)
+	public static MutableComponent formatCompactMoney(long totalHao) {
+		double xu = totalHao / 1000.0;
+		String formattedStr;
+
+		// Mốc Tỷ Xu (Billion)
+		if (xu >= 1_000_000_000.0) {
+			formattedStr = String.format(xu % 1_000_000_000.0 == 0 ? "%.0fB" : "%.1fB", xu / 1_000_000_000.0);
+			return Component.literal(formattedStr + " Xu").withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD);
+		}
+		// Mốc Triệu Xu (Million)
+		else if (xu >= 1_000_000.0) {
+			formattedStr = String.format(xu % 1_000_000.0 == 0 ? "%.0fM" : "%.1fM", xu / 1_000_000.0);
+			return Component.literal(formattedStr + " Xu").withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD);
+		}
+		// Mốc Ngàn Xu (Kilo)
+		else if (xu >= 1_000.0) {
+			formattedStr = String.format(xu % 1_000.0 == 0 ? "%.0fk" : "%.1fk", xu / 1_000.0);
+			return Component.literal(formattedStr + " Xu").withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD);
+		}
+
+		// Nếu dưới 1,000 Xu thì giữ nguyên định dạng chi tiết để người chơi dễ nhìn số dư lẻ
+		long xuLong = totalHao / 1000;
+		long haoLong = totalHao % 1000;
+
+		if (xuLong > 0 && haoLong > 0) {
+			return Component.literal(String.format("%,d Xu ", xuLong)).withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD)
+					.append(Component.literal(String.format("%,d Hào", haoLong)).withStyle(ChatFormatting.YELLOW));
+		} else if (xuLong > 0) {
+			return Component.literal(String.format("%,d Xu", xuLong)).withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD);
+		} else {
+			return Component.literal(String.format("%,d Hào", haoLong)).withStyle(ChatFormatting.YELLOW);
+		}
 	}
 }

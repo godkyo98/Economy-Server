@@ -108,7 +108,7 @@ public class KyoMarketGui extends SimpleGui {
 
         GuiElementBuilder infoButton = GuiElementBuilder.from(new ItemStack(Items.PAPER))
             .setName(Component.literal("Trang " + (currentPage + 1) + " / " + Math.max(1, maxPages)).withStyle(ChatFormatting.WHITE));
-        this.setSlot(53, infoButton);
+        this.setSlot(49, infoButton);
     }
 
     private void buyItem(MarketItem listing) {
