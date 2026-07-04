@@ -1,72 +1,97 @@
 package kyoeconomy.config;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import net.fabricmc.loader.api.FabricLoader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Properties;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 public class KyoEconomyConfig {
     public static final Logger LOGGER = LoggerFactory.getLogger("kyoeconomy");
+    private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 
-    // Tên lệnh mặc định
-    public static String CMD_BAL = "bal";
-    public static String CMD_PAY = "pay";
-    public static String CMD_ECO = "eco";
-    public static String CMD_SHOP = "shop";
-    public static String CMD_AH = "ah";
+    // 🚀 CHUYỂN SANG DÙNG LIST ĐỂ CHỨA ĐA NGÔN NGỮ (ALIAS)
+    public static List<String> CMD_BAL = new ArrayList<>(Arrays.asList("bal", "balance", "sodu", "tien"));
+    public static List<String> CMD_PAY = new ArrayList<>(Arrays.asList("pay", "chuyenkhoan", "chuyentien"));
+    public static List<String> CMD_ECO = new ArrayList<>(Arrays.asList("eco", "economy", "kinhte"));
+    public static List<String> CMD_SHOP = new ArrayList<>(Arrays.asList("shop", "cuahang", "taphoa"));
+    public static List<String> CMD_AH = new ArrayList<>(Arrays.asList("ah", "choden", "daugia"));
 
     public static void loadConfig() {
-        // 1. Định nghĩa thư mục con và file bên trong nó
         Path configDir = FabricLoader.getInstance().getConfigDir().resolve("kyoeconomy");
-        Path configFile = configDir.resolve("commands.properties"); // Đổi tên file cho gọn
-
-        Properties props = new Properties();
-        boolean needsUpdate = false;
+        Path configFile = configDir.resolve("commands.json"); // Đổi sang đuôi JSON
 
         try {
-            // 2. Tạo thư mục 'config/kyoeconomy' nếu nó chưa tồn tại
             if (!Files.exists(configDir)) {
                 Files.createDirectories(configDir);
             }
 
-            // 3. Nếu file đã tồn tại, đọc nội dung cũ lên
             if (Files.exists(configFile)) {
-                try (InputStream in = Files.newInputStream(configFile)) {
-                    props.load(in);
+                // Nếu file đã tồn tại, đọc mảng JSON lên
+                try (FileReader reader = new FileReader(configFile.toFile())) {
+                    JsonObject jsonObject = JsonParser.parseReader(reader).getAsJsonObject();
+
+                    CMD_BAL = getListFromJson(jsonObject, "command_balance", CMD_BAL);
+                    CMD_PAY = getListFromJson(jsonObject, "command_pay", CMD_PAY);
+                    CMD_ECO = getListFromJson(jsonObject, "command_admin", CMD_ECO);
+                    CMD_SHOP = getListFromJson(jsonObject, "command_shop", CMD_SHOP);
+                    CMD_AH = getListFromJson(jsonObject, "command_ah", CMD_AH);
                 }
             } else {
-                needsUpdate = true; // Nếu chưa có file thì chắc chắn phải tạo mới (update)
+                // Nếu file chưa tồn tại, tạo mới
+                saveDefaultConfig(configFile);
             }
-
-            // 2. Kiểm tra sự tồn tại của từng key. Nếu thiếu, bổ sung giá trị mặc định và báo cần update
-            if (!props.containsKey("command_balance")) { props.setProperty("command_balance", "bal"); needsUpdate = true; }
-            if (!props.containsKey("command_pay")) { props.setProperty("command_pay", "pay"); needsUpdate = true; }
-            if (!props.containsKey("command_admin")) { props.setProperty("command_admin", "eco"); needsUpdate = true; }
-            if (!props.containsKey("command_shop")) { props.setProperty("command_shop", "shop"); needsUpdate = true; }
-            if (!props.containsKey("command_ah")) { props.setProperty("command_ah", "ah"); needsUpdate = true; }
-
-            // 3. Gán giá trị vào biến (lúc này chắc chắn 100% các key đều đã có dữ liệu)
-            CMD_BAL = props.getProperty("command_balance");
-            CMD_PAY = props.getProperty("command_pay");
-            CMD_ECO = props.getProperty("command_admin");
-            CMD_SHOP = props.getProperty("command_shop");
-            CMD_AH = props.getProperty("command_ah");
-
-            // 4. Nếu là file mới tinh HOẶC file cũ bị thiếu dòng (bản update mới) -> Mở ổ đĩa ghi lại!
-            if (needsUpdate) {
-                try (OutputStream out = Files.newOutputStream(configFile)) {
-                    props.store(out, "Kyo Economy Commands Configuration (Thay doi ten lenh tai day)");
-                }
-                LOGGER.info("[KyoEconomy] Đã cập nhật/tạo mới file cấu hình lệnh (kyoeconomy.properties)!");
-            }
-
         } catch (Exception e) {
-            LOGGER.error("[KyoEconomy] Khong the doc/ghi file config cua KyoEconomy!", e);
+            LOGGER.error("[KyoEconomy] Lỗi khi nạp file cấu hình commands.json!", e);
         }
+    }
+
+    private static List<String> getListFromJson(JsonObject jsonObject, String key, List<String> defaultValue) {
+        if (jsonObject.has(key) && jsonObject.get(key).isJsonArray()) {
+            JsonArray array = jsonObject.getAsJsonArray(key);
+            List<String> list = new ArrayList<>();
+            for (int i = 0; i < array.size(); i++) {
+                list.add(array.get(i).getAsString().toLowerCase()); // Ép về chữ thường cho an toàn
+            }
+            return list.isEmpty() ? defaultValue : list;
+        }
+        return defaultValue;
+    }
+
+    private static void saveDefaultConfig(Path configFile) {
+        JsonObject rootObject = new JsonObject();
+
+        rootObject.add("command_balance", createJsonArray(CMD_BAL));
+        rootObject.add("command_pay", createJsonArray(CMD_PAY));
+        rootObject.add("command_admin", createJsonArray(CMD_ECO));
+        rootObject.add("command_shop", createJsonArray(CMD_SHOP));
+        rootObject.add("command_ah", createJsonArray(CMD_AH));
+
+        try (FileWriter writer = new FileWriter(configFile.toFile())) {
+            GSON.toJson(rootObject, writer);
+            LOGGER.info("[KyoEconomy] Đã tạo mới file cấu hình đa lệnh (commands.json)!");
+        } catch (IOException e) {
+            LOGGER.error("[KyoEconomy] Không thể lưu file cấu hình mặc định!", e);
+        }
+    }
+
+    private static JsonArray createJsonArray(List<String> list) {
+        JsonArray array = new JsonArray();
+        for (String s : list) {
+            array.add(s);
+        }
+        return array;
     }
 }

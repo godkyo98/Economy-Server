@@ -23,29 +23,21 @@ public class ShopConfigManager {
     private static final File FILE = CONFIG_DIR.resolve("shop.json").toFile();
 
     public static final List<ShopItem> SHOP_ITEMS = new ArrayList<>();
-
-    // --- BỘ ĐẾM SÀN CHỨNG KHOÁN ---
     private static long lastUpdateTime = 0;
-    private static final long PRICE_CHANGE_INTERVAL_MS = 60 * 60 * 1000; // 60 phút biến động giá 1 lần
+    private static final long PRICE_CHANGE_INTERVAL_MS = 60 * 60 * 1000;
 
     public static void tick(MinecraftServer server) {
         long now = System.currentTimeMillis();
-        // Nếu đã hết thời gian đếm ngược
         if (now - lastUpdateTime >= PRICE_CHANGE_INTERVAL_MS && !SHOP_ITEMS.isEmpty()) {
-
-            // Xáo trộn giá của toàn bộ Cửa hàng
             for (ShopItem item : SHOP_ITEMS) {
                 item.rollNewPrice();
             }
-
-            // Thông báo toàn Server chuẩn bị gom hàng
             server.getPlayerList().broadcastSystemMessage(
                 Component.literal("[Cửa Hàng] ").withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD)
                     .append(Component.literal("Thị trường vừa biến động! Giá cả vật phẩm đã được cập nhật mới.").withStyle(ChatFormatting.YELLOW)),
                 false
             );
-
-            lastUpdateTime = now; // Reset đồng hồ
+            lastUpdateTime = now;
         }
     }
 
@@ -80,16 +72,15 @@ public class ShopConfigManager {
                         long fixedPrice = itemObj.has("price") ? (long)(itemObj.get("price").getAsDouble() * 1000) : 0;
                         int slot = itemObj.has("slot") ? itemObj.get("slot").getAsInt() : i;
 
-                        // Tạo Item (Nó sẽ tự chốt random giá lần đầu bên trong constructor)
-                        SHOP_ITEMS.add(new ShopItem(resourceLocation.toString(), item, name, fixedPrice, minPrice, maxPrice, slot));
+                        // Đọc danh mục (mặc định là "khac" nếu trống)
+                        String category = itemObj.has("category") ? itemObj.get("category").getAsString().toLowerCase() : "khac";
+
+                        SHOP_ITEMS.add(new ShopItem(resourceLocation.toString(), item, name, fixedPrice, minPrice, maxPrice, slot, category));
                     }
                 }
             }
             KyoEconomy.LOGGER.info("[KyoEconomy] Đã tải thành công {} vật phẩm vào Cửa hàng!", SHOP_ITEMS.size());
-
-            // Kích hoạt đồng hồ cho Thị trường chứng khoán ngay lần load đầu tiên
             if (lastUpdateTime == 0) lastUpdateTime = System.currentTimeMillis();
-
         } catch (Exception e) {
             KyoEconomy.LOGGER.error("[KyoEconomy] Lỗi khi đọc file shop.json!", e);
         }
@@ -111,22 +102,18 @@ public class ShopConfigManager {
             }
 
             JsonArray itemsArray = rootObject.getAsJsonArray("items");
-
             String itemId = BuiltInRegistries.ITEM.getKey(item).toString();
 
             JsonObject newItemObj = new JsonObject();
             newItemObj.addProperty("item_id", itemId);
             newItemObj.addProperty("name", name);
+            newItemObj.addProperty("category", "khac"); // Lệnh add nhanh sẽ mặc định ném vào mục khác
 
             if (fixedPriceXu > 0) {
                 newItemObj.addProperty("price", fixedPriceXu);
             } else {
                 newItemObj.addProperty("min_price", minPriceXu);
                 newItemObj.addProperty("max_price", maxPriceXu);
-            }
-
-            if (customSellPriceXu >= 0) {
-                newItemObj.addProperty("customSellPrice", customSellPriceXu);
             }
 
             itemsArray.add(newItemObj);
@@ -137,7 +124,6 @@ public class ShopConfigManager {
 
             loadShop();
             return true;
-
         } catch (IOException e) {
             KyoEconomy.LOGGER.error("[KyoEconomy] Lỗi khi thêm vật phẩm mới vào shop.json!", e);
             return false;
@@ -149,7 +135,6 @@ public class ShopConfigManager {
             CONFIG_DIR.toFile().mkdirs();
             JsonObject rootObject = new JsonObject();
             rootObject.add("items", new JsonArray());
-
             try (FileWriter writer = new FileWriter(FILE)) {
                 GSON.toJson(rootObject, writer);
             }
