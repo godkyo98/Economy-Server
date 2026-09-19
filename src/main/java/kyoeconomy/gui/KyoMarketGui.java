@@ -14,6 +14,7 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.entity.item.ItemEntity;
 
 import java.util.List;
 
@@ -130,7 +131,8 @@ public class KyoMarketGui extends SimpleGui {
             KyoMarketState marketState = KyoMarketState.getServerState(this.player.level().getServer());
             marketState.removeListing(listing.getId());
             if (!this.player.getInventory().add(listing.getItemStack().copy())) {
-                this.player.drop(listing.getItemStack().copy(), false);
+                ItemEntity dropItem = new ItemEntity(this.player.level(), this.player.getX(), this.player.getY(), this.player.getZ(), listing.getItemStack().copy());
+                this.player.level().addFreshEntity(dropItem);
             }
 
             // 5. Thông báo cho người mua
@@ -164,7 +166,8 @@ public class KyoMarketGui extends SimpleGui {
         marketState.removeListing(listing.getId());
 
         if (!this.player.getInventory().add(listing.getItemStack().copy())) {
-            this.player.drop(listing.getItemStack().copy(), false);
+            ItemEntity dropItem = new ItemEntity(this.player.level(), this.player.getX(), this.player.getY(), this.player.getZ(), listing.getItemStack().copy());
+            this.player.level().addFreshEntity(dropItem);
         }
         this.player.sendSystemMessage(Component.literal("Đã thu hồi vật phẩm treo bán thành công!").withStyle(ChatFormatting.YELLOW));
         renderPage();
