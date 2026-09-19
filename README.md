@@ -89,7 +89,7 @@ Hỗ trợ hệ thống Giá biến động ngẫu nhiên theo chu kỳ và tự
 }
 ```
 
-💡 Danh sách 6 Tag Danh Mục hợp lệ:
+## 💡 Danh sách 6 Tag Danh Mục hợp lệ:
 
 blocks: Khối xây dựng
 
@@ -103,7 +103,7 @@ mob_drops: Chiến lợi phẩm quái vật
 
 special: Vật phẩm đặc biệt & Đồ hiếm
 
-🎮 Hướng Dẫn Tương Tác Cửa Hàng (KyoShopGui)
+## 🎮 Hướng Dẫn Tương Tác Cửa Hàng (KyoShopGui)
 Hệ thống cung cấp cơ chế tương tác trực quan ngay tại túi đồ người chơi (nửa dưới màn hình):
 
 Chuột Trái Tự Do: Thoải mái cầm, chia đôi hoặc sắp xếp lại vật phẩm trong túi đồ mà không lo bị hệ thống kích hoạt bán nhầm.
@@ -116,7 +116,7 @@ Bán Nhanh An Toàn: Nhấp Shift + Chuột Phải để bán đứt ngay stack 
 
 Chuyển Trang (Pagination): Dễ dàng chuyển tiếp giữa các trang trong danh mục bằng các nút điều hướng trực quan ở hàng dưới cùng của GUI.
 
-🔗 Hỗ Trợ PlaceholderAPI
+## 🔗 Hỗ Trợ PlaceholderAPI
 Nhúng số dư người chơi vào Kyo Scoreboard, TabList hoặc Chat:
 
 %kyoeconomy:balance%: Trả về số dư định dạng rút gọn thông minh (15.5k Xu, 2M Xu, 1B Xu). Tự động giữ nguyên định dạng lẻ (Hào) nếu tài sản dưới 1,000 Xu.
