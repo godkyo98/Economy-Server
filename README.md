@@ -1,20 +1,26 @@
 # 💰 Kyo Economy
 
-![Minecraft Version](https://img.shields.io/badge/Minecraft-26.2-2ea44f?style=for-the-badge&logo=minecraft)
+![Minecraft Version](https://img.shields.io/badge/Minecraft-26.3-2ea44f?style=for-the-badge&logo=minecraft)
+![Fabric Loader](https://img.shields.io/badge/Fabric%20Loader-0.19.5-dbd087?style=for-the-badge)
 ![Platform](https://img.shields.io/badge/Fabric-Server--Side-E3C95A?style=for-the-badge)
 ![API](https://img.shields.io/badge/Polymer-UI-blue?style=for-the-badge)
 
-**Kyo Economy** là một hệ thống Kinh tế và Giao thương toàn diện, được thiết kế độc quyền cho **TEA Server**. Chạy hoàn toàn trên máy chủ (100% Server-side), người chơi không cần cài đặt thêm bất kỳ mod nào ở Client mà vẫn được trải nghiệm hệ thống Cửa hàng đa tầng, Chợ đen và hệ thống Thẩm định vật phẩm với trải nghiệm UI/UX cực kỳ chuyên nghiệp.
+**Kyo Economy** là một hệ thống Kinh tế và Giao thương toàn diện, được thiết kế độc quyền cho **TEA Server**. Hoạt động hoàn toàn trên máy chủ (100% Server-side), người chơi không cần cài đặt thêm bất kỳ mod nào ở Client mà vẫn được trải nghiệm hệ thống Cửa hàng đa tầng phân trang, Chợ đen và hệ thống Thẩm định vật phẩm với trải nghiệm UI/UX mượt mà, trực quan.
 
 ---
 
 ## ✨ Tính Năng Nổi Bật
 
-* 🛡️ **Kiến Trúc Dữ Liệu Tối Tân**: Loại bỏ hoàn toàn hệ thống NBT cũ kỹ dễ gây lỗi. Kyo Economy sử dụng công nghệ `DataFixerUpper (DFU)` kết hợp `RecordCodecBuilder` mới nhất của Mojang để đọc/ghi dữ liệu siêu tốc, chống thất thoát tài sản tuyệt đối.
-* 🌍 **Hệ Thống Lệnh Đa Ngôn Ngữ (Multi-Alias)**: Phá bỏ mọi rào cản ngôn ngữ! Cho phép gán vô số tên gọi cho cùng một lệnh (Ví dụ: `/bal` và `/sodu`, `/shop` và `/cuahang`). Cực kỳ thân thiện cho các máy chủ có cả người chơi trong nước và quốc tế.
-* 🛍️ **Giao Diện Đa Tầng (Nested Menu)**: Trải nghiệm mua bán chuẩn RPG. Cửa hàng được phân tách làm 6 Danh mục chuyên biệt (Khối xây dựng, Nông sản, Vũ khí, Chiến lợi phẩm...) giúp người chơi dễ dàng tìm kiếm mà không cần lật trang mỏi mệt.
-* ⚙️ **Cỗ Máy Thu Mua Vạn Năng**: Thiết kế tối ưu hóa UX đỉnh cao! Cho phép **Kéo & Thả (Drag & Drop)** vật phẩm trực tiếp vào cửa hàng để thanh lý, hoặc sử dụng tổ hợp phím túi đồ an toàn (như Shift + Chuột Phải) để bán đứt mà không sợ lỡ tay ấn nhầm khi đang sắp xếp rương.
-* 🔍 **Thẩm Định Phù Phép**: Cơ chế độc quyền cho phép định giá các trang bị có phù phép. Giá trị được phân chia từ Bậc cơ bản đến Thần Cấp, mang lại giá trị cày cuốc cực cao cho các hoạt động PvE và Câu cá.
+* 🛡️ **Kiến Trúc Dữ Liệu Tối Tân & An Toàn Vật Phẩm**: 
+  * Loại bỏ hoàn toàn hệ thống NBT cũ kỹ dễ gây lỗi. Mod sử dụng công nghệ `DataFixerUpper (DFU)` kết hợp `RecordCodecBuilder` của Mojang để đọc/ghi dữ liệu siêu tốc, chống thất thoát tài sản tuyệt đối.
+  * Toàn bộ cơ chế trả đồ/nhận đồ được chuyển sang spawn `ItemEntity` trực tiếp thay vì phụ thuộc vào Player drop API, loại bỏ triệt để nguy cơ mất đồ khi túi đồ đầy hoặc gặp sự cố mạng.
+* 🌍 **Hệ Thống Lệnh Đa Ngôn Ngữ (Multi-Alias)**: Phá bỏ mọi rào cản ngôn ngữ! Cho phép gán vô số tên gọi cho cùng một lệnh (ví dụ: `/bal`, `/tien`, `/sodu`; `/shop`, `/cuahang`). Cực kỳ thân thiện cho các máy chủ đa quốc gia.
+* 🛍️ **Giao Diện Đa Tầng & Phân Trang (Pagination)**: Cửa hàng được phân tách làm 6 Danh mục chuyên biệt với tên thân thiện (friendly names) và tích hợp sẵn hệ thống chuyển trang (Pagination), giúp duyệt hàng trăm món đồ dễ dàng, không bị tràn khung.
+* ⚙️ **Cỗ Máy Thu Mua Đa Năng**: 
+  * Hỗ trợ bán vật phẩm ngay trên con trỏ chuột (Cursor Sale).
+  * Hỗ trợ thao tác thanh lý nhanh từ túi đồ và bán toàn bộ mặt hàng (Sell All).
+  * Tự do sắp xếp túi đồ mà không lo bị bán nhầm.
+* 🔍 **Thẩm Định Phù Phép Chuẩn Xác**: Cơ chế tính toán giá trị cộng thêm từ phù phép (Enchantment Bonus) được nâng cấp chặt chẽ và chuẩn hóa thành nhiều bậc giá trị, đi kèm hệ thống âm thanh và tin nhắn phản hồi sinh động khi kiểm tra giá.
 * 📊 **Tối Ưu Hiển Thị Scoreboard**: Tự động rút gọn tiền tệ khổng lồ thành định dạng thông minh (`15.5k`, `1.2M`, `4.5B`) qua PlaceholderAPI, giữ cho Scoreboard & TabList luôn sạch sẽ và chống vỡ khung.
 
 ---
@@ -22,8 +28,9 @@
 ## 📦 Yêu Cầu Cài Đặt (Dependencies)
 
 Để Kyo Economy hoạt động hoàn hảo, máy chủ của bạn cần cài đặt các mod lõi sau:
-* **Fabric API** (Phiên bản tương thích 26.2)
-* **Polymer** (Core & Resource Pack)
+* **Fabric Loader** (`>= 0.19.5`)
+* **Fabric API** (Phiên bản tương thích Minecraft 26.3)
+* **Polymer** (Core & Resource Pack phiên bản mới nhất)
 * **SGUI** (Server-side GUIs)
 * **Placeholder API** (eu.pb4.placeholder-api v3+)
 
@@ -35,11 +42,11 @@
 | :--- | :--- | :--- |
 | `/bal [người chơi]` | Xem số dư tài khoản của bản thân hoặc người khác. | Mọi người chơi |
 | `/pay <người chơi> <số tiền>` | Chuyển tiền cho người chơi khác (Tối thiểu 0.001 Xu). | Mọi người chơi |
-| `/shop` | Mở Sảnh Cửa hàng của Máy chủ. | Mọi người chơi |
-| `/ah` | Mở Chợ đen - Sàn giao dịch tự do. | Mọi người chơi |
+| `/shop` | Mở Sảnh Cửa hàng chính của Máy chủ. | Mọi người chơi |
+| `/ah` | Mở Chợ đen - Sàn giao dịch tự do giữa người chơi. | Mọi người chơi |
 | `/eco <give/take/set> <mục tiêu> <số tiền>` | Can thiệp trực tiếp vào tài khoản người chơi. | **Admin (OP)** |
 
-*(💡 Lưu ý: Danh sách trên chỉ là tên gọi gốc. Bạn có thể sử dụng cấu trúc Mảng (Array) trong file cấu hình để đăng ký hàng loạt các tên lệnh thay thế (alias) theo ý thích!)*
+*(💡 Lưu ý: Danh sách trên là tên mặc định. Bạn có thể thiết lập nhiều tên lệnh khác nhau thông qua tệp `commands.json`.)*
 
 ---
 
@@ -48,7 +55,7 @@
 Mọi tệp cấu hình được tạo tự động tại thư mục `config/kyoeconomy/`:
 
 ### 1. `commands.json` (Hệ thống Lệnh Đa Ngôn Ngữ)
-Sử dụng mảng chuỗi (String Array) để cho phép người chơi gọi lệnh bằng nhiều cách khác nhau. Rất tiện lợi cho Server đa quốc gia:
+Sử dụng mảng chuỗi (String Array) để cho phép người chơi gọi lệnh bằng nhiều cách khác nhau:
 ```json
 {
   "cmd_bal": ["bal", "money", "sodu", "tien"],
@@ -58,8 +65,9 @@ Sử dụng mảng chuỗi (String Array) để cho phép người chơi gọi l
   "cmd_eco": ["eco", "economy", "quantritien"]
 }
 ```
-### 2. `shop.json` (Quản lý Cửa Hàng & Sàn Chứng Khoán)
-   Hỗ trợ hệ thống Giá biến động (tự động nhảy giá ngẫu nhiên sau mỗi chu kỳ) và tự động phân luồng vào 6 Tab danh mục bằng thuộc tính "category":
+
+2. shop.json (Quản lý Mặt Hàng & Phân Trang Danh Mục)
+Hỗ trợ hệ thống Giá biến động ngẫu nhiên theo chu kỳ và tự động phân loại mặt hàng vào các Tab danh mục:
 
 ```JSON
 {
@@ -80,24 +88,37 @@ Sử dụng mảng chuỗi (String Array) để cho phép người chơi gọi l
   ]
 }
 ```
-* 💡 Danh sách 6 Tag Danh Mục hợp lệ: blocks (Khối xây), food (Thực phẩm), materials (Nguyên liệu), equipment (Trang bị), mob_drops (Đồ quái vật rớt), special (Đồ hiếm).
 
-##  🎮 Hướng Dẫn Tương Tác Cửa Hàng Chuyên Nghiệp
-Để giúp việc thanh lý đồ đạc rác trong túi trở nên dễ dàng nhất, hệ thống Cửa hàng Kyo cung cấp 3 cơ chế tương tác ở Khung Hành Trang của người chơi (nửa dưới màn hình):
+💡 Danh sách 6 Tag Danh Mục hợp lệ:
 
-* **Chuột Trái Tự Do**: Bạn có thể thoải mái click Chuột Trái để cầm, chia đôi, hoặc sắp xếp lại vật phẩm trong túi đồ của mình mà không sợ hệ thống vô tình "bán nhầm" đồ của bạn.
+blocks: Khối xây dựng
 
-* **Kéo & Thả (Drag & Drop)**: Hãy cầm một vật phẩm hoặc một stack từ túi đồ, nhấp thẳng vào bất kỳ ô trống nào trên Cửa Hàng. Hệ thống sẽ tự động thu mua nó với giá niêm yết (10% giá gốc + Phù phép)!
+food: Nông sản & Thực phẩm
 
-* **Thao Tác Nhanh** (Fast Actions): Đưa chuột vào đồ trong túi và sử dụng:
+materials: Nguyên liệu & Khoáng sản
 
-* * **🖱️ Chuột Phải**: Thẩm định giá. In ra hóa đơn chi tiết trên Chat xem món đồ này bán được bao nhiêu Xu (đặc biệt hữu dụng để tính giá đồ Phù phép).
+equipment: Vũ khí & Trang bị
 
-* * **⌨️ Shift + Chuột Phải**: Bán Đứt. Bán thẳng toàn bộ (1 stack) mặt hàng đó vào máy chủ cực kỳ an toàn.
+mob_drops: Chiến lợi phẩm quái vật
 
-## 🔗 Hỗ Trợ PlaceholderAPI
-Sử dụng biến số dưới đây để nhúng số dư của người chơi vào Kyo Scoreboard, TabList hoặc khung Chat:
+special: Vật phẩm đặc biệt & Đồ hiếm
 
-* **%kyoeconomy:balance%**: Trả về số tiền cực kỳ gọn gàng (15.5k Xu, 2M Xu, 1B Xu). Giữ nguyên định dạng lẻ (Hào) nếu tài sản dưới 1,000 Xu.
+🎮 Hướng Dẫn Tương Tác Cửa Hàng (KyoShopGui)
+Hệ thống cung cấp cơ chế tương tác trực quan ngay tại túi đồ người chơi (nửa dưới màn hình):
 
-# Phát triển bởi Kyo - Dành riêng cho Kỷ nguyên TEA Server.
+Chuột Trái Tự Do: Thoải mái cầm, chia đôi hoặc sắp xếp lại vật phẩm trong túi đồ mà không lo bị hệ thống kích hoạt bán nhầm.
+
+Bán Trên Con Trỏ Chuột (Cursor Sale): Cầm vật phẩm trên con trỏ chuột và nhấp vào khu vực cửa hàng để bán ngay với giá niêm yết (tính kèm thưởng cấp độ phù phép).
+
+Kiểm Tra Giá (Price Check): Nhấp Chuột Phải vào vật phẩm trong túi để in hóa đơn thẩm định chi tiết ra khung chat kèm hiệu ứng âm thanh.
+
+Bán Nhanh An Toàn: Nhấp Shift + Chuột Phải để bán đứt ngay stack vật phẩm đó cho máy chủ.
+
+Chuyển Trang (Pagination): Dễ dàng chuyển tiếp giữa các trang trong danh mục bằng các nút điều hướng trực quan ở hàng dưới cùng của GUI.
+
+🔗 Hỗ Trợ PlaceholderAPI
+Nhúng số dư người chơi vào Kyo Scoreboard, TabList hoặc Chat:
+
+%kyoeconomy:balance%: Trả về số dư định dạng rút gọn thông minh (15.5k Xu, 2M Xu, 1B Xu). Tự động giữ nguyên định dạng lẻ (Hào) nếu tài sản dưới 1,000 Xu.
+
+Phát triển bởi Kyo — Dành riêng cho Kỷ nguyên TEA Server.
