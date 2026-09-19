@@ -88,37 +88,43 @@ Hỗ trợ hệ thống Giá biến động ngẫu nhiên theo chu kỳ và tự
   ]
 }
 ```
+---
 
 ## 💡 Danh sách 6 Tag Danh Mục hợp lệ:
 
-blocks: Khối xây dựng
+* blocks: Khối xây dựng
 
-food: Nông sản & Thực phẩm
+* food: Nông sản & Thực phẩm
 
-materials: Nguyên liệu & Khoáng sản
+* materials: Nguyên liệu & Khoáng sản
 
-equipment: Vũ khí & Trang bị
+* equipment: Vũ khí & Trang bị
 
-mob_drops: Chiến lợi phẩm quái vật
+* mob_drops: Chiến lợi phẩm quái vật
 
-special: Vật phẩm đặc biệt & Đồ hiếm
+* special: Vật phẩm đặc biệt & Đồ hiếm
+
+---
 
 ## 🎮 Hướng Dẫn Tương Tác Cửa Hàng (KyoShopGui)
-Hệ thống cung cấp cơ chế tương tác trực quan ngay tại túi đồ người chơi (nửa dưới màn hình):
+* Hệ thống cung cấp cơ chế tương tác trực quan ngay tại túi đồ người chơi (nửa dưới màn hình):
 
-Chuột Trái Tự Do: Thoải mái cầm, chia đôi hoặc sắp xếp lại vật phẩm trong túi đồ mà không lo bị hệ thống kích hoạt bán nhầm.
+* Chuột Trái Tự Do: Thoải mái cầm, chia đôi hoặc sắp xếp lại vật phẩm trong túi đồ mà không lo bị hệ thống kích hoạt bán nhầm.
 
-Bán Trên Con Trỏ Chuột (Cursor Sale): Cầm vật phẩm trên con trỏ chuột và nhấp vào khu vực cửa hàng để bán ngay với giá niêm yết (tính kèm thưởng cấp độ phù phép).
+* Bán Trên Con Trỏ Chuột (Cursor Sale): Cầm vật phẩm trên con trỏ chuột và nhấp vào khu vực cửa hàng để bán ngay với giá niêm yết (tính kèm thưởng cấp độ phù phép).
 
-Kiểm Tra Giá (Price Check): Nhấp Chuột Phải vào vật phẩm trong túi để in hóa đơn thẩm định chi tiết ra khung chat kèm hiệu ứng âm thanh.
+* Kiểm Tra Giá (Price Check): Nhấp Chuột Phải vào vật phẩm trong túi để in hóa đơn thẩm định chi tiết ra khung chat kèm hiệu ứng âm thanh.
 
-Bán Nhanh An Toàn: Nhấp Shift + Chuột Phải để bán đứt ngay stack vật phẩm đó cho máy chủ.
+* Bán Nhanh An Toàn: Nhấp Shift + Chuột Phải để bán đứt ngay stack vật phẩm đó cho máy chủ.
 
-Chuyển Trang (Pagination): Dễ dàng chuyển tiếp giữa các trang trong danh mục bằng các nút điều hướng trực quan ở hàng dưới cùng của GUI.
+* Chuyển Trang (Pagination): Dễ dàng chuyển tiếp giữa các trang trong danh mục bằng các nút điều hướng trực quan ở hàng dưới cùng của GUI.
+
+---
 
 ## 🔗 Hỗ Trợ PlaceholderAPI
-Nhúng số dư người chơi vào Kyo Scoreboard, TabList hoặc Chat:
+* Nhúng số dư người chơi vào Kyo Scoreboard, TabList hoặc Chat:
 
-%kyoeconomy:balance%: Trả về số dư định dạng rút gọn thông minh (15.5k Xu, 2M Xu, 1B Xu). Tự động giữ nguyên định dạng lẻ (Hào) nếu tài sản dưới 1,000 Xu.
+* %kyoeconomy:balance%: Trả về số dư định dạng rút gọn thông minh (15.5k Xu, 2M Xu, 1B Xu). Tự động giữ nguyên định dạng lẻ (Hào) nếu tài sản dưới 1,000 Xu.
+---
 
-Phát triển bởi Kyo — Dành riêng cho Kỷ nguyên TEA Server.
+## Phát triển bởi Kyo — Dành riêng cho Kỷ nguyên TEA Server.
